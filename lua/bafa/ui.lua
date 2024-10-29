@@ -110,6 +110,44 @@ function M.delete_menu_item()
   vim.api.nvim_buf_set_lines(BAFA_BUF_ID, selected_line_number - 1, selected_line_number, false, {})
 end
 
+function M.delete_multiple_menu_items()
+  local choice = 1
+
+  if BAFA_BUF_ID == nil or not vim.api.nvim_buf_is_valid(BAFA_BUF_ID) then
+    return
+  end
+
+  local start = vim.fn.getpos("'<")[2]
+  local _end = vim.fn.getpos("'<")[2]
+
+  for i = start, _end do
+    local selected_line_number = i
+    local selected_buffer = BufferUtils.get_buffer_by_index(selected_line_number)
+
+    if selected_buffer == nil then
+      return
+    end
+
+    if vim.bo[selected_buffer.number].modified then
+      choice = vim.fn.inputlist({ "Yes", "No" })
+    end
+
+    if choice ~= 1 then
+      return
+    end
+
+    if selected_line_number == 1 then
+      close_window()
+      vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+      M.toggle()
+      return
+    end
+
+    vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+    vim.api.nvim_buf_set_lines(BAFA_BUF_ID, selected_line_number - 1, selected_line_number, false, {})
+  end
+end
+
 function M.on_menu_save()
   print(vim.inspect("on_menu_save"))
 end
