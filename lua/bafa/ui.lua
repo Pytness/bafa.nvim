@@ -117,15 +117,19 @@ function M.delete_multiple_menu_items()
     return
   end
 
-  local start = vim.fn.getpos("'<")[2]
-  local _end = vim.fn.getpos("'>")[2]
+  local start = vim.fn.getpos("v")[2]
+  local end_ = vim.fn.getpos(".")[2]
 
-  print(start, _end)
+  if start > end_ then
+    start, end_ = end_, start
+  end
 
-  for i = start, _end do
-    print("deleting: " .. i)
-    local selected_line_number = i
-    local selected_buffer = BufferUtils.get_buffer_by_index(selected_line_number)
+  local deleted_self = start == 1
+
+  local buffers = BufferUtils.get_buffers_as_table()
+
+  for line_number = start, end_ do
+    local selected_buffer = buffers[line_number]
 
     if selected_buffer == nil then
       return
@@ -135,20 +139,19 @@ function M.delete_multiple_menu_items()
       choice = vim.fn.inputlist({ "Yes", "No" })
     end
 
-    if choice ~= 1 then
-      return
-    end
-
-    if selected_line_number == 1 then
-      close_window()
+    if choice == 1 then
       vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
-      M.toggle()
-      return
     end
-
-    vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
-    vim.api.nvim_buf_set_lines(BAFA_BUF_ID, selected_line_number - 1, selected_line_number, false, {})
   end
+
+  vim.api.nvim_buf_set_lines(BAFA_BUF_ID, start - 1, end_, false, {})
+
+  if deleted_self then
+    close_window()
+    M.toggle()
+  end
+
+  vim.api.nvim_input("<esc>")
 end
 
 function M.on_menu_save()
