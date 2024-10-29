@@ -28,8 +28,7 @@ function M.defaults(bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, "n", "<CR>", "<Cmd>lua require('bafa.ui').select_menu_item()<CR>", {})
   vim.api.nvim_buf_set_keymap(bufnr, "n", "dd", "<Cmd>lua require('bafa.ui').delete_menu_item()<CR>", {})
   vim.api.nvim_buf_set_keymap(bufnr, "n", "D", "<Cmd>lua require('bafa.ui').delete_menu_item()<CR>", {})
-  vim.api.nvim_buf_set_keymap(bufnr, "v", "dd", "<Cmd>lua require('bafa.ui').delete_multiple_menu_items()<CR>", {})
-  vim.api.nvim_buf_set_keymap(bufnr, "v", "D", "<Cmd>lua require('bafa.ui').delete_multiple_menu_items()<CR>", {})
+  vim.api.nvim_buf_set_keymap(bufnr, "v", "d", "<Cmd>lua require('bafa.ui').delete_multiple_menu_items()<CR>", {})
 end
 
 return M
