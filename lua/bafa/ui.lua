@@ -118,9 +118,12 @@ function M.delete_multiple_menu_items()
   end
 
   local start = vim.fn.getpos("'<")[2]
-  local _end = vim.fn.getpos("'<")[2]
+  local _end = vim.fn.getpos("'>")[2]
+
+  print(start, _end)
 
   for i = start, _end do
+    print("deleting: " .. i)
     local selected_line_number = i
     local selected_buffer = BufferUtils.get_buffer_by_index(selected_line_number)
 
