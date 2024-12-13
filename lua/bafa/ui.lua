@@ -209,6 +209,8 @@ local add_diagnostics_icons = function(idx, buffer)
 end
 
 function M.toggle()
+  local config = Config.get()
+
   if BAFA_WIN_ID ~= nil and vim.api.nvim_win_is_valid(BAFA_WIN_ID) then
     close_window()
     return
@@ -223,7 +225,11 @@ function M.toggle()
 
   for idx, buffer in ipairs(valid_buffers) do
     local icon, _ = get_buffer_icon(buffer)
-    contents[idx] = string.format("  %s %s", icon, buffer.name)
+    if config.icons then
+      contents[idx] = string.format("%s %s", icon, buffer.name)
+    else
+      contents[idx] = buffer.name
+    end
   end
 
   vim.wo[BAFA_WIN_ID].number = true
@@ -236,11 +242,13 @@ function M.toggle()
 
   for idx, buffer in ipairs(valid_buffers) do
     -- add highlights
-    add_ft_icon_highlight(idx, buffer)
+    if config.icons then
+      add_ft_icon_highlight(idx, buffer)
+    end
     -- add modified highlights
     add_modified_highlight(idx, buffer)
     -- add diagnostics
-    if Config.get().diagnostics then
+    if config.diagnostics then
       if add_diagnostics_icons(idx, buffer) == true then
         has_diagnostics = true
       end
@@ -252,12 +260,8 @@ function M.toggle()
     vim.api.nvim_win_set_width(BAFA_WIN_ID, vim.api.nvim_win_get_width(BAFA_WIN_ID) + 4)
   end
 
-  local config = Config.get()
-
   Keymaps.noop(BAFA_BUF_ID, config.noop_keys)
-  if config.keymaps then
-    Keymaps.defaults(BAFA_BUF_ID, config.keymaps)
-  end
+  Keymaps.keymaps(BAFA_BUF_ID, config.keymaps)
 
   Autocmds.defaults(BAFA_BUF_ID)
 end

@@ -32,7 +32,7 @@ function M.noop(bufnr, keys)
   end
 end
 
-function M.defaults(bufnr, keymaps)
+function M.keymaps(bufnr, keymaps)
   keymaps = keymaps or default_keymaps
 
   for _, keymap in ipairs(keymaps) do

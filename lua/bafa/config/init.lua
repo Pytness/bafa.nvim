@@ -6,7 +6,9 @@ M.defaults = {
   relative = "editor",
   border = "rounded",
   style = "minimal",
+
   diagnostics = true,
+  icons = true,
 
   keymaps = nil,
   noop_keys = nil,

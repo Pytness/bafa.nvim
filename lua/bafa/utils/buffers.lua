@@ -46,13 +46,16 @@ end
 M.get_buffers_as_table = function()
   local buffers = {}
   local buffer_numbers = vim.api.nvim_list_bufs()
+
   for _, buffer_number in ipairs(buffer_numbers) do
     local is_valid_buffer = M.is_valid_buffer(buffer_number)
+
     if is_valid_buffer then
       local last_used = vim.fn.getbufinfo(buffer_number)[1].lastused
       local buffer_name = vim.api.nvim_buf_get_name(buffer_number)
       local buffer_file_name = text_utils.get_normalized_path(buffer_name) or "untitled"
       local is_modified = vim.bo[buffer_number].modified == true
+
       local buffer = {
         name = buffer_file_name,
         path = buffer_name,
@@ -60,6 +63,7 @@ M.get_buffers_as_table = function()
         last_used = last_used,
         is_modified = is_modified,
       }
+
       table.insert(buffers, buffer)
       table.sort(buffers, function(a, b)
         return a.last_used > b.last_used
