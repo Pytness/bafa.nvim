@@ -252,8 +252,13 @@ function M.toggle()
     vim.api.nvim_win_set_width(BAFA_WIN_ID, vim.api.nvim_win_get_width(BAFA_WIN_ID) + 4)
   end
 
-  Keymaps.noop(BAFA_BUF_ID)
-  Keymaps.defaults(BAFA_BUF_ID)
+  local config = Config.get()
+
+  Keymaps.noop(BAFA_BUF_ID, config.noop_keys)
+  if config.keymaps then
+    Keymaps.defaults(BAFA_BUF_ID, config.keymaps)
+  end
+
   Autocmds.defaults(BAFA_BUF_ID)
 end
 

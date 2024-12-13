@@ -7,6 +7,9 @@ M.defaults = {
   border = "rounded",
   style = "minimal",
   diagnostics = true,
+
+  keymaps = nil,
+  noop_keys = nil,
 }
 
 M.options = M.defaults
