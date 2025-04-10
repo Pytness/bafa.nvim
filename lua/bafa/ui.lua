@@ -195,24 +195,29 @@ function M.on_menu_save()
 end
 
 --- Add highlight to the buffer icon
----@param idx number
+---@param index number
 ---@param buffer table
 ---@return nil
-local function add_ft_icon_highlight(idx, buffer)
+local function add_ft_icon_highlight(index, buffer)
   if BAFA_BUFFER_ID == nil then
     return
   end
   local _, icon_hl_group = get_buffer_icon(buffer)
   local icon_hl = vim.api.nvim_get_hl(0, { name = icon_hl_group }).fg
-  local hl_group = "BafaIcon" .. tostring(idx)
+  local hl_group = "BafaIcon" .. tostring(index)
+
+  local line = index - 1
+  local start = { line, 2 }
+  local end_ = { line, 3 }
+
   vim.api.nvim_set_hl(0, hl_group, { fg = string.format("#%06x", icon_hl) })
-  vim.api.nvim_buf_add_highlight(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, hl_group, idx - 1, 2, 3)
+  vim.hl.range(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, hl_group, start, end_)
 end
 
 --- Colors the buffer name if it is modified
----@param idx number
+---@param index number
 ---@param buffer table
-local function add_modified_highlight(idx, buffer)
+local function add_modified_highlight(index, buffer)
   if BAFA_BUFFER_ID == nil then
     return
   end
@@ -229,8 +234,12 @@ local function add_modified_highlight(idx, buffer)
     fg = string.format("#%06x", hl.fg)
   end
 
+  local line = index - 1
+  local start = { line, 0 }
+  local end_ = { line, -1 }
+
   vim.api.nvim_set_hl(0, hl_name, { fg = fg })
-  vim.api.nvim_buf_add_highlight(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, hl_name, idx - 1, 0, -1)
+  vim.hl.range(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, hl_name, start, end_)
 end
 
 --- Add diagnostics icons to the buffer menu
@@ -240,7 +249,7 @@ end
 ---@return boolean
 local function add_diagnostics_icons(index, buffer)
   if BAFA_BUFFER_ID == nil then
-    return
+    return false
   end
 
   local has_diagnostics = false
