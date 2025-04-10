@@ -1,3 +1,6 @@
+local DIAGNOSTICS_LABELS = { "Error", "Warn", "Info", "Hint" }
+local DIAGNOSTICS_SIGNS = { " ", " ", " ", " " }
+
 local Config = require("bafa.config")
 local BufferUtils = require("bafa.utils.buffers")
 local Keymaps = require("bafa.utils.keymaps")
@@ -5,12 +8,8 @@ local Autocmds = require("bafa.utils.autocmds")
 local _, Devicons = pcall(require, "nvim-web-devicons")
 
 local BAFA_NAMESPACE_ID = vim.api.nvim_create_namespace("bafa.nvim")
-
 local BAFA_WINDOW_ID = nil
 local BAFA_BUFFER_ID = nil
-
-local DIAGNOSTICS_LABELS = { "Error", "Warn", "Info", "Hint" }
-local DIAGNOSTICS_SIGNS = { " ", " ", " ", " " }
 
 --- Get the diagnostics for a buffer
 ---
@@ -20,11 +19,13 @@ local function get_diagnostics(buffer_number)
   local count = vim.diagnostic.count(buffer_number)
   local diagnostics = {}
 
-  for k, v in pairs(count) do
-    local defined_sign = vim.fn.sign_getdefined("DiagnosticSign" .. DIAGNOSTICS_LABELS[k])
-    local sign_icon = #defined_sign ~= 0 and defined_sign[1].text or DIAGNOSTICS_SIGNS[k]
-    table.insert(diagnostics, { tostring(v) .. sign_icon, "DiagnosticSign" .. DIAGNOSTICS_LABELS[k] })
+  for key, value in pairs(count) do
+    local defined_sign = vim.fn.sign_getdefined("DiagnosticSign" .. DIAGNOSTICS_LABELS[key])
+    local sign_icon = #defined_sign ~= 0 and defined_sign[1].text or DIAGNOSTICS_SIGNS[key]
+
+    table.insert(diagnostics, { tostring(value) .. sign_icon, "DiagnosticSign" .. DIAGNOSTICS_LABELS[key] })
   end
+
   return diagnostics
 end
 
@@ -36,7 +37,9 @@ local function get_buffer_icon(buffer)
   if Devicons == nil then
     return "", "Normal" -- fallback to default icon, when devicons is not available
   end
+
   local icon, icon_hl = Devicons.get_icon(buffer.name, buffer.extension, { default = true })
+
   return icon, icon_hl
 end
 
@@ -44,12 +47,16 @@ local function close_window()
   if BAFA_WINDOW_ID == nil or not vim.api.nvim_win_is_valid(BAFA_WINDOW_ID) then
     return
   end
+
   vim.api.nvim_win_close(BAFA_WINDOW_ID, true)
+
   BAFA_WINDOW_ID = nil
   BAFA_BUFFER_ID = nil
 end
 
 --- Create a new window for the buffer menu
+---
+--- @return table # A table containing the buffer number and window ID
 local function create_window()
   local bafa_config = Config.get()
   local buffer_number = vim.api.nvim_create_buf(false, false)
@@ -64,6 +71,9 @@ local function create_window()
   local width = math.min(max_width, buffer_longest_name_width + 10)
   local height = math.min(max_height, buffer_lines + 2)
 
+  local row_position = math.floor(((vim.o.lines - (bafa_config.height or height)) / 2) - 1)
+  local col_position = math.floor((vim.o.columns - (bafa_config.width or width)) / 2)
+
   BAFA_WINDOW_ID = vim.api.nvim_open_win(buffer_number, true, {
     title = bafa_config.title,
     title_pos = bafa_config.title_pos,
@@ -71,8 +81,8 @@ local function create_window()
     border = bafa_config.border,
     width = bafa_config.width or width,
     height = bafa_config.height or height,
-    row = math.floor(((vim.o.lines - (bafa_config.height or height)) / 2) - 1),
-    col = math.floor((vim.o.columns - (bafa_config.width or width)) / 2),
+    row = row_position,
+    col = col_position,
     style = bafa_config.style,
   })
 
@@ -179,6 +189,7 @@ function M.delete_multiple_menu_items()
   vim.api.nvim_input("<esc>")
 end
 
+--- Function to handle the menu save action
 function M.on_menu_save()
   print(vim.inspect("on_menu_save"))
 end
@@ -187,7 +198,7 @@ end
 ---@param idx number
 ---@param buffer table
 ---@return nil
-local add_ft_icon_highlight = function(idx, buffer)
+local function add_ft_icon_highlight(idx, buffer)
   if BAFA_BUFFER_ID == nil then
     return
   end
@@ -201,7 +212,7 @@ end
 --- Colors the buffer name if it is modified
 ---@param idx number
 ---@param buffer table
-local add_modified_highlight = function(idx, buffer)
+local function add_modified_highlight(idx, buffer)
   if BAFA_BUFFER_ID == nil then
     return
   end
@@ -222,7 +233,12 @@ local add_modified_highlight = function(idx, buffer)
   vim.api.nvim_buf_add_highlight(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, hl_name, idx - 1, 0, -1)
 end
 
-local add_diagnostics_icons = function(idx, buffer)
+--- Add diagnostics icons to the buffer menu
+---
+---@param index number
+---@param buffer table
+---@return boolean
+local function add_diagnostics_icons(index, buffer)
   if BAFA_BUFFER_ID == nil then
     return
   end
@@ -232,7 +248,7 @@ local add_diagnostics_icons = function(idx, buffer)
   local diagnostics = get_diagnostics(buffer.number)
 
   for _, diagnostic in ipairs(diagnostics) do
-    vim.api.nvim_buf_set_extmark(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, idx - 1, 0, {
+    vim.api.nvim_buf_set_extmark(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, index - 1, 0, {
       virt_text = { { diagnostic[1], diagnostic[2] } },
     })
     has_diagnostics = true
@@ -258,13 +274,13 @@ function M.toggle()
 
   local valid_buffers = BufferUtils.get_buffers_as_table()
 
-  for idx, buffer in ipairs(valid_buffers) do
+  for index, buffer in ipairs(valid_buffers) do
     local icon, _ = get_buffer_icon(buffer)
 
     if config.icons then
-      contents[idx] = string.format("%s %s", icon, buffer.name)
+      contents[index] = string.format("%s %s", icon, buffer.name)
     else
-      contents[idx] = buffer.name
+      contents[index] = buffer.name
     end
   end
 
@@ -276,15 +292,15 @@ function M.toggle()
 
   local has_diagnostics = false
 
-  for idx, buffer in ipairs(valid_buffers) do
+  for index, buffer in ipairs(valid_buffers) do
     if config.icons then
-      add_ft_icon_highlight(idx, buffer)
+      add_ft_icon_highlight(index, buffer)
     end
 
-    add_modified_highlight(idx, buffer)
+    add_modified_highlight(index, buffer)
 
     if config.diagnostics then
-      if add_diagnostics_icons(idx, buffer) == true then
+      if add_diagnostics_icons(index, buffer) == true then
         has_diagnostics = true
       end
     end
