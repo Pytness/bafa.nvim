@@ -190,7 +190,7 @@ local add_modified_highlight = function(idx, buffer)
     fg = string.format("#%06x", hl.fg)
   end
   vim.api.nvim_set_hl(0, hl_name, { fg = fg })
-  vim.api.nvim_buf_add_highlight(BAFA_BUF_ID, BAFA_NS_ID, hl_name, idx - 1, 4, -1)
+  vim.api.nvim_buf_add_highlight(BAFA_BUF_ID, BAFA_NS_ID, hl_name, idx - 1, 0, -1)
 end
 
 local add_diagnostics_icons = function(idx, buffer)
