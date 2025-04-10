@@ -1,3 +1,10 @@
+--- @class bafa.utils.buffer_info
+--- @field name string
+--- @field path string
+--- @field number integer
+--- @field last_used integer
+--- @field is_modified boolean
+
 local text_utils = require("bafa.utils.text")
 
 local M = {}
@@ -65,7 +72,7 @@ end
 
 --- Get the buffer name by number
 ---
---- @return table # A table of buffers information
+--- @return table<bafa.utils.buffer_info> # A table of buffers information
 function M.get_buffers_as_table()
   local buffers = {}
   local buffer_numbers = vim.api.nvim_list_bufs()
@@ -82,6 +89,7 @@ function M.get_buffers_as_table()
     local buffer_file_name = text_utils.get_normalized_path(buffer_name) or "untitled"
     local is_modified = vim.bo[buffer_number].modified == true
 
+    --- @type bafa.utils.buffer_info
     local buffer = {
       name = buffer_file_name,
       path = buffer_name,

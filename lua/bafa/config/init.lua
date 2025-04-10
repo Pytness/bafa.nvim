@@ -16,15 +16,15 @@ M.defaults = {
 
 M.options = M.defaults
 
-M.setup = function(config)
+function M.setup(config)
   M.options = vim.tbl_deep_extend("force", M.defaults, config or {})
 end
 
-M.set = function(config)
+function M.set(config)
   M.options = vim.tbl_deep_extend("force", M.options, config or {})
 end
 
-M.get = function()
+function M.get()
   return M.options
 end
 

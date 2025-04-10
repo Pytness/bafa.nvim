@@ -30,7 +30,7 @@ local default_keymaps = {
 ---
 --- @param buffer_number integer The buffer number
 --- @param keys table | nil The keys to set as noop
-function M.noop(buffer_number, keys)
+function M.set_noop_keys(buffer_number, keys)
   keys = keys or noop_keys
 
   for _, key in ipairs(noop_keys) do
@@ -42,7 +42,7 @@ end
 ---
 --- @param buffer_number integer The buffer number
 --- @param keymaps table | nil The keymaps to set
-function M.keymaps(buffer_number, keymaps)
+function M.set_keymaps(buffer_number, keymaps)
   keymaps = keymaps or default_keymaps
 
   for _, keymap in ipairs(keymaps) do

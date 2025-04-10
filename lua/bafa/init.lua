@@ -2,7 +2,7 @@ local Config = require("bafa.config")
 
 local M = {}
 
-M.setup = function(config)
+function M.setup(config)
   Config.setup(config)
 end
 
