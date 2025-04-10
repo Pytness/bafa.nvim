@@ -25,15 +25,24 @@ local default_keymaps = {
   { "n", "D", "<Cmd>lua require('bafa.ui').delete_menu_item()<CR>", {} },
   { "v", "d", "<Cmd>lua require('bafa.ui').delete_multiple_menu_items()<CR>", {} },
 }
-function M.noop(bufnr, keys)
+
+--- Set the keymaps for a buffer as a noop
+---
+--- @param buffer_number integer The buffer number
+--- @param keys table | nil The keys to set as noop
+function M.noop(buffer_number, keys)
   keys = keys or noop_keys
 
   for _, key in ipairs(noop_keys) do
-    vim.api.nvim_buf_set_keymap(bufnr, "n", key, "", { silent = true })
+    vim.api.nvim_buf_set_keymap(buffer_number, "n", key, "", { silent = true })
   end
 end
 
-function M.keymaps(bufnr, keymaps)
+--- Set the keymaps for a buffer
+---
+--- @param buffer_number integer The buffer number
+--- @param keymaps table | nil The keymaps to set
+function M.keymaps(buffer_number, keymaps)
   keymaps = keymaps or default_keymaps
 
   for _, keymap in ipairs(keymaps) do
@@ -42,7 +51,7 @@ function M.keymaps(bufnr, keymaps)
     local action = keymap[3]
     local options = keymap[4] or {}
 
-    options.buffer = bufnr
+    options.buffer = buffer_number
 
     vim.keymap.set(mode, key, action, options)
   end
