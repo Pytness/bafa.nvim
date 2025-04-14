@@ -1,8 +1,3 @@
---- @class bafa.config.sorting_algorithm_enum
---- @field LAST_USED string
---- @field NAME string
---- @field MODIFIED string
-
 --- @class bafa.config.config
 --- @field title string The title of the Bafa menu
 --- @field title_pos string The position of the title
@@ -13,16 +8,11 @@
 --- @field icons boolean Whether to show icons
 --- @field keymaps table<string> | nil The keymaps for the Bafa menu
 --- @field noop_keys table<string> | nil The keys to ignore in the Bafa menu
---- @field sorting_algorithm string The sorting algorithm for the Bafa menu
+--- @field sorting_algorithm bafa.utils.sorting.AlgorithmName The sorting algorithm for the Bafa menu
+
+local SortingAlgorithm = require("bafa.utils.sorting").Algorithm
 
 local M = {}
-
---- @type bafa.config.sorting_algorithm_enum
-M.SortingAlgorithm = {
-  LAST_USED = "last_used",
-  NAME = "name",
-  MODIFIED = "modified",
-}
 
 --- @type bafa.config.config
 M.defaults = {
@@ -38,7 +28,7 @@ M.defaults = {
   keymaps = nil,
   noop_keys = nil,
 
-  sorting_algorithm = M.SortingAlgorithm.LAST_USED,
+  sorting_algorithm = SortingAlgorithm.LAST_USED,
 }
 
 M.options = M.defaults
