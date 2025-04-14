@@ -70,7 +70,7 @@ function M.get_buffer_by_index(buffer_index)
   return buffer
 end
 
---- Get the buffer name by number
+--- Get a table of `@bafa.utils.buffer_info` name by number
 ---
 --- @return table<bafa.utils.buffer_info> # A table of buffers information
 function M.get_buffers_as_table()
