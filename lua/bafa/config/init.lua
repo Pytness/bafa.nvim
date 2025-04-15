@@ -4,6 +4,8 @@
 --- @field relative string The relative position of the Bafa menu
 --- @field border string The border style of the Bafa menu
 --- @field style string The style of the Bafa menu
+--- @field width number | nil The width of the Bafa menu
+--- @field height number | nil The height of the Bafa menu
 --- @field diagnostics boolean Whether to show diagnostics
 --- @field icons boolean Whether to show icons
 --- @field keymaps table<string> | nil The keymaps for the Bafa menu
