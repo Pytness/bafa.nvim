@@ -6,8 +6,8 @@
 --- @field is_modified boolean
 
 local text_utils = require("bafa.utils.text")
-local config = require("bafa.config")
-local sorting = require("bafa.utils.sorting")
+local Config = require("bafa.config")
+local Sorting = require("bafa.utils.sorting")
 
 local M = {}
 
@@ -102,8 +102,8 @@ function M.get_buffers_as_table()
 
     table.insert(buffers, buffer)
 
-    local sorting_algorithm = config.get().sorting_algorithm
-    local sorting_algorithm_function = sorting.get_sorting_algorithm(sorting_algorithm)
+    local sorting_algorithm = Config.get().sorting_algorithm
+    local sorting_algorithm_function = Sorting.get_sorting_algorithm(sorting_algorithm)
 
     if sorting_algorithm_function ~= nil then
       table.sort(buffers, sorting_algorithm_function)

@@ -74,8 +74,9 @@ function M.sort_by_number(a, b)
 end
 
 --- Get the sorting algorithm based on the given algorithm
+--- If no algorithm is provided, it defaults to last_used
 ---
---- @param algorithm bafa.utils.sorting.AlgorithmEnum The sorting algorithm
+--- @param algorithm bafa.utils.sorting.AlgorithmName The sorting algorithm
 --- @return function | nil # The sorting algorithm function
 function M.get_sorting_algorithm(algorithm)
   local sorting_algorithm = nil
@@ -85,6 +86,9 @@ function M.get_sorting_algorithm(algorithm)
   elseif algorithm == M.Algorithm.NUMBER then
     sorting_algorithm = M.sort_by_number
   elseif algorithm == M.Algorithm.LAST_USED then
+    sorting_algorithm = M.sort_by_last_used
+  else
+    -- Default to last used if the algorithm is not recognized
     sorting_algorithm = M.sort_by_last_used
   end
 
