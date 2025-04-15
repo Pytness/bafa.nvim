@@ -24,6 +24,7 @@ local default_keymaps = {
   { "n", "dd", "<Cmd>lua require('bafa.ui').delete_menu_item()<CR>", {} },
   { "n", "D", "<Cmd>lua require('bafa.ui').delete_menu_item()<CR>", {} },
   { "v", "d", "<Cmd>lua require('bafa.ui').delete_multiple_menu_items()<CR>", {} },
+  { "n", "s", "<Cmd>lua require('bafa.ui').cycle_sort()<CR>", {} },
 }
 
 --- Set the keymaps for a buffer as a noop

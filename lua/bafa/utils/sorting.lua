@@ -17,6 +17,35 @@ M.Algorithm = {
   NUMBER = "number",
 }
 
+--- Get sorting algorithm names
+---
+--- @return table<bafa.utils.sorting.AlgorithmName> # The sorting algorithm names
+function M.get_sorting_algorithm_names()
+  return {
+    M.Algorithm.LAST_USED,
+    M.Algorithm.NAME,
+    M.Algorithm.NUMBER,
+  }
+end
+
+--- Get the sorting algorithm index based on the given algorithm
+---
+--- @param algorithm bafa.utils.sorting.AlgorithmName The sorting algorithm
+--- @return integer | nil # The sorting algorithm index
+function M.get_sort_algorithm_index(algorithm)
+  local algorithm_index = nil
+
+  if algorithm == M.Algorithm.LAST_USED then
+    algorithm_index = 1
+  elseif algorithm == M.Algorithm.NAME then
+    algorithm_index = 2
+  elseif algorithm == M.Algorithm.NUMBER then
+    algorithm_index = 3
+  end
+
+  return algorithm_index
+end
+
 --- Sort the buffers by last used
 ---
 --- @param a bafa.utils.buffer_info The first buffer

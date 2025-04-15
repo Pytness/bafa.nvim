@@ -1,3 +1,7 @@
+--- @class bafa.ui.BufferWindow
+--- @field bufnr number The buffer number
+--- @field win_id number The window ID
+
 local DIAGNOSTICS_LABELS = { "Error", "Warn", "Info", "Hint" }
 local DIAGNOSTICS_SIGNS = { " ", " ", " ", " " }
 
@@ -6,10 +10,26 @@ local BufferUtils = require("bafa.utils.buffers")
 local Keymaps = require("bafa.utils.keymaps")
 local Autocmds = require("bafa.utils.autocmds")
 local _, Devicons = pcall(require, "nvim-web-devicons")
+local Sorting = require("bafa.utils.sorting")
 
 local BAFA_NAMESPACE_ID = vim.api.nvim_create_namespace("bafa.nvim")
-local BAFA_WINDOW_ID = nil
-local BAFA_BUFFER_ID = nil
+
+local BAFA_WINDOW_ID = nil --- @type integer | nil
+local BAFA_BUFFER_ID = nil --- @type integer | nil
+
+--- Check if the window id is valid
+---
+--- @return boolean
+local function is_valid_window_id()
+  return BAFA_WINDOW_ID ~= nil and vim.api.nvim_win_is_valid(BAFA_WINDOW_ID)
+end
+
+--- Check if the buffer id is valid
+---
+--- @return boolean
+local function is_valid_buffer_id()
+  return BAFA_BUFFER_ID ~= nil and vim.api.nvim_buf_is_valid(BAFA_BUFFER_ID)
+end
 
 --- Get the diagnostics for a buffer
 ---
@@ -44,9 +64,11 @@ local function get_buffer_icon(buffer)
 end
 
 local function close_window()
-  if BAFA_WINDOW_ID == nil or not vim.api.nvim_win_is_valid(BAFA_WINDOW_ID) then
+  if not is_valid_window_id() then
     return
   end
+
+  --- @cast BAFA_WINDOW_ID -nil
 
   vim.api.nvim_win_close(BAFA_WINDOW_ID, true)
 
@@ -56,7 +78,7 @@ end
 
 --- Create a new window for the buffer menu
 ---
---- @return table # A table containing the buffer number and window ID
+--- @return bafa.ui.BufferWindow
 local function create_window()
   local bafa_config = Config.get()
   local buffer_number = vim.api.nvim_create_buf(false, false)
@@ -113,9 +135,11 @@ end
 function M.delete_menu_item()
   local choice = 1
 
-  if BAFA_BUFFER_ID == nil or not vim.api.nvim_buf_is_valid(BAFA_BUFFER_ID) then
+  if not is_valid_buffer_id() then
     return
   end
+
+  --- @cast BAFA_BUFFER_ID -nil
 
   local selected_line_number = vim.api.nvim_win_get_cursor(0)[1]
   local selected_buffer = BufferUtils.get_buffer_by_index(selected_line_number)
@@ -143,14 +167,18 @@ function M.delete_menu_item()
 
   vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
   vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, selected_line_number - 1, selected_line_number, false, {})
+
+  M.draw_window()
 end
 
 function M.delete_multiple_menu_items()
   local choice = 1
 
-  if BAFA_BUFFER_ID == nil or not vim.api.nvim_buf_is_valid(BAFA_BUFFER_ID) then
+  if not is_valid_buffer_id() then
     return
   end
+
+  --- @cast BAFA_BUFFER_ID -nil
 
   local start = vim.fn.getpos("v")[2]
   local end_ = vim.fn.getpos(".")[2]
@@ -181,12 +209,44 @@ function M.delete_multiple_menu_items()
 
   vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, start - 1, end_, false, {})
 
+  M.draw_window()
+
   if deleted_self then
     close_window()
     M.toggle()
   end
 
   vim.api.nvim_input("<esc>")
+end
+
+function M.cycle_sort()
+  local config = Config.get()
+
+  local sort_algorithm = config.sorting_algorithm
+  local sort_algorithm_index = Sorting.get_sort_algorithm_index(sort_algorithm)
+
+  print(sort_algorithm_index)
+
+  if sort_algorithm_index == nil then
+    return
+  end
+
+  local algorithms = Sorting.get_sorting_algorithm_names()
+  print("algorithms", vim.inspect(algorithms))
+
+  local next_algorithm_index = (sort_algorithm_index + 1)
+
+  if next_algorithm_index > #algorithms then
+    next_algorithm_index = 1
+  end
+
+  local next_algorithm = algorithms[next_algorithm_index]
+  print(next_algorithm)
+
+  config.sorting_algorithm = next_algorithm
+  Config.set(config)
+
+  M.draw_window()
 end
 
 --- Function to handle the menu save action
@@ -270,17 +330,35 @@ end
 function M.toggle()
   local config = Config.get()
 
-  if BAFA_WINDOW_ID ~= nil and vim.api.nvim_win_is_valid(BAFA_WINDOW_ID) then
+  if is_valid_window_id() then
     close_window()
     return
   end
 
   local win_info = create_window()
-  local contents = {}
 
   BAFA_WINDOW_ID = win_info.win_id
   BAFA_BUFFER_ID = win_info.bufnr
 
+  M.draw_window()
+
+  Keymaps.set_noop_keys(BAFA_BUFFER_ID, config.noop_keys)
+  Keymaps.set_keymaps(BAFA_BUFFER_ID, config.keymaps)
+
+  Autocmds.set_defaults(BAFA_BUFFER_ID)
+end
+
+function M.draw_window()
+  if not is_valid_window_id() or not is_valid_buffer_id() then
+    return
+  end
+
+  --- @cast BAFA_BUFFER_ID -nil
+  --- @cast BAFA_WINDOW_ID -nil
+
+  local config = Config.get()
+
+  local contents = {}
   local valid_buffers = BufferUtils.get_buffers_as_table()
 
   for index, buffer in ipairs(valid_buffers) do
@@ -320,10 +398,9 @@ function M.toggle()
     vim.api.nvim_win_set_width(BAFA_WINDOW_ID, vim.api.nvim_win_get_width(BAFA_WINDOW_ID) + 4)
   end
 
-  Keymaps.set_noop_keys(BAFA_BUFFER_ID, config.noop_keys)
-  Keymaps.set_keymaps(BAFA_BUFFER_ID, config.keymaps)
-
-  Autocmds.set_defaults(BAFA_BUFFER_ID)
+  -- Change the title of the window
+  local title = config.title .. " (" .. #valid_buffers .. ") " .. config.sorting_algorithm .. " "
+  vim.api.nvim_win_set_config(BAFA_WINDOW_ID, { title = title })
 end
 
 return M
