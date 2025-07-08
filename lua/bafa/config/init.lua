@@ -1,5 +1,12 @@
 --- @class bafa.config.config
---- @field title string The title of the Bafa menu
+--- The title of the Bafa menu
+---
+--- Allows multiple formatting options:
+--- %count: The number of items in the menu
+--- %sort: The current sorting algorithm used
+---
+--- Example: "Bafa (%count items, sorted by %sort)"
+--- @field title string
 --- @field title_pos string The position of the title
 --- @field relative string The relative position of the Bafa menu
 --- @field border string The border style of the Bafa menu
