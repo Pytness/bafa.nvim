@@ -12,6 +12,7 @@
 --- @field noop_keys table<string> | nil The keys to ignore in the Bafa menu
 --- @field sorting_algorithm bafa.utils.sorting.AlgorithmName The sorting algorithm for the Bafa menu
 --- @field show_sorting_algorithm boolean Whether to show the sorting algorithm in the Bafa menu
+--- @field show_current_buffer boolean Show the current buffer in the Bafa menu
 
 local SortingAlgorithm = require("bafa.utils.sorting").Algorithm
 
@@ -33,6 +34,7 @@ M.defaults = {
 
   sorting_algorithm = SortingAlgorithm.LAST_USED,
   show_sorting_algorithm = false,
+  show_current_buffer = true,
 }
 
 M.options = M.defaults

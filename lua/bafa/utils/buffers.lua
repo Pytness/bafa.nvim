@@ -4,6 +4,7 @@
 --- @field number integer
 --- @field last_used integer
 --- @field is_modified boolean
+--- @field current boolean
 
 local text_utils = require("bafa.utils.text")
 local Config = require("bafa.config")
@@ -79,7 +80,10 @@ function M.get_buffers_as_table()
   local buffers = {}
   local buffer_numbers = vim.api.nvim_list_bufs()
 
-  for _, buffer_number in ipairs(buffer_numbers) do
+  local max_last_used = 0
+  local max_last_used_index = 0
+
+  for index, buffer_number in ipairs(buffer_numbers) do
     local is_valid_buffer = M.is_valid_buffer(buffer_number)
 
     if not is_valid_buffer then
@@ -98,18 +102,28 @@ function M.get_buffers_as_table()
       number = buffer_number,
       last_used = last_used,
       is_modified = is_modified,
+      current = false,
     }
 
     table.insert(buffers, buffer)
 
-    local sorting_algorithm = Config.get().sorting_algorithm
-    local sorting_algorithm_function = Sorting.get_sorting_algorithm(sorting_algorithm)
-
-    if sorting_algorithm_function ~= nil then
-      table.sort(buffers, sorting_algorithm_function)
+    if last_used > max_last_used then
+      max_last_used = last_used
+      max_last_used_index = index
     end
 
     ::continue::
+  end
+
+  if max_last_used_index ~= 0 then
+    buffers[max_last_used_index].current = true
+  end
+
+  local sorting_algorithm = Config.get().sorting_algorithm
+  local sorting_algorithm_function = Sorting.get_sorting_algorithm(sorting_algorithm)
+
+  if sorting_algorithm_function ~= nil then
+    table.sort(buffers, sorting_algorithm_function)
   end
 
   return buffers

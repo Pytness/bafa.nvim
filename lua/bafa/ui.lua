@@ -361,6 +361,7 @@ function M.draw_window()
   local contents = {}
   local valid_buffers = BufferUtils.get_buffers_as_table()
 
+  local current_buffer_index = nil
   for index, buffer in ipairs(valid_buffers) do
     local icon, _ = get_buffer_icon(buffer)
 
@@ -368,6 +369,10 @@ function M.draw_window()
       contents[index] = string.format("%s %s", icon, buffer.name)
     else
       contents[index] = buffer.name
+    end
+
+    if buffer.current then
+      current_buffer_index = index
     end
   end
 
@@ -396,6 +401,16 @@ function M.draw_window()
   if has_diagnostics then
     -- increase the width of the window to accommodate the diagnostics icons
     vim.api.nvim_win_set_width(BAFA_WINDOW_ID, vim.api.nvim_win_get_width(BAFA_WINDOW_ID) + 4)
+  end
+
+  if config.show_current_buffer then
+    -- Show '>' in the sign column for the current buffer
+    if current_buffer_index ~= nil then
+      vim.api.nvim_buf_set_extmark(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, current_buffer_index - 1, 0, {
+        sign_text = ">",
+        sign_hl_group = "BafaCurrentBuffer",
+      })
+    end
   end
 
   -- Change the title of the window
