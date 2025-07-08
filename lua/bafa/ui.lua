@@ -403,11 +403,11 @@ function M.draw_window()
     vim.api.nvim_win_set_width(BAFA_WINDOW_ID, vim.api.nvim_win_get_width(BAFA_WINDOW_ID) + 4)
   end
 
-  if config.show_current_buffer then
+  if config.current_buffer_sign ~= false then
     -- Show '>' in the sign column for the current buffer
     if current_buffer_index ~= nil then
       vim.api.nvim_buf_set_extmark(BAFA_BUFFER_ID, BAFA_NAMESPACE_ID, current_buffer_index - 1, 0, {
-        sign_text = ">",
+        sign_text = config.current_buffer_sign,
         sign_hl_group = "BafaCurrentBuffer",
       })
     end
