@@ -399,7 +399,12 @@ function M.draw_window()
   end
 
   -- Change the title of the window
-  local title = config.title .. " (" .. #valid_buffers .. ") " .. config.sorting_algorithm .. " "
+
+  local title = config.title .. " (" .. #valid_buffers .. ") "
+  if config.show_sorting_algorithm then
+    title = title .. config.sorting_algorithm .. " "
+  end
+
   vim.api.nvim_win_set_config(BAFA_WINDOW_ID, { title = title })
 end
 

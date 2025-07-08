@@ -11,6 +11,7 @@
 --- @field keymaps table<string> | nil The keymaps for the Bafa menu
 --- @field noop_keys table<string> | nil The keys to ignore in the Bafa menu
 --- @field sorting_algorithm bafa.utils.sorting.AlgorithmName The sorting algorithm for the Bafa menu
+--- @field show_sorting_algorithm boolean Whether to show the sorting algorithm in the Bafa menu
 
 local SortingAlgorithm = require("bafa.utils.sorting").Algorithm
 
@@ -31,6 +32,7 @@ M.defaults = {
   noop_keys = nil,
 
   sorting_algorithm = SortingAlgorithm.LAST_USED,
+  show_sorting_algorithm = false,
 }
 
 M.options = M.defaults
