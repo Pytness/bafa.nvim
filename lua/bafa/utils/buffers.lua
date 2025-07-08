@@ -82,11 +82,13 @@ function M.get_buffers_as_table()
 
   local max_last_used = 0
   local max_last_used_index = 0
+  local skipped_buffers = 0
 
   for index, buffer_number in ipairs(buffer_numbers) do
     local is_valid_buffer = M.is_valid_buffer(buffer_number)
 
     if not is_valid_buffer then
+      skipped_buffers = skipped_buffers + 1
       goto continue
     end
 
@@ -109,13 +111,13 @@ function M.get_buffers_as_table()
 
     if last_used > max_last_used then
       max_last_used = last_used
-      max_last_used_index = index
+      max_last_used_index = index - skipped_buffers
     end
 
     ::continue::
   end
 
-  if max_last_used_index ~= 0 then
+  if max_last_used_index > 0 then
     buffers[max_last_used_index].current = true
   end
 
