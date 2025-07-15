@@ -142,13 +142,15 @@ function M.delete_menu_item()
   --- @cast BAFA_BUFFER_ID -nil
 
   local selected_line_number = vim.api.nvim_win_get_cursor(0)[1]
-  local selected_buffer = BufferUtils.get_buffer_by_index(selected_line_number)
 
-  if selected_buffer == nil then
+  local buffers = BufferUtils.get_buffers_as_table()
+  local buffer = buffers[selected_line_number]
+
+  if buffer == nil then
     return
   end
 
-  if vim.bo[selected_buffer.number].modified then
+  if buffer.is_modified then
     choice = vim.fn.inputlist({ "Yes", "No" })
   end
 
@@ -156,24 +158,20 @@ function M.delete_menu_item()
     return
   end
 
-  if selected_line_number == 1 then
+  if buffer.current then
     close_window()
-    vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
-
+    vim.api.nvim_buf_delete(buffer.number, { force = true })
     M.toggle()
-
-    return
+  else
+    vim.api.nvim_buf_delete(buffer.number, { force = true })
   end
 
-  vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
   vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, selected_line_number - 1, selected_line_number, false, {})
 
   M.draw_window()
 end
 
 function M.delete_multiple_menu_items()
-  local choice = 1
-
   if not is_valid_buffer_id() then
     return
   end
@@ -187,36 +185,35 @@ function M.delete_multiple_menu_items()
     start, end_ = end_, start
   end
 
-  local deleted_self = start == 1
-
   local buffers = BufferUtils.get_buffers_as_table()
 
   for line_number = start, end_ do
     local selected_buffer = buffers[line_number]
 
     if selected_buffer == nil then
-      return
+      goto continue
     end
 
-    if vim.bo[selected_buffer.number].modified then
+    local choice = 1
+    if selected_buffer.is_modified then
       choice = vim.fn.inputlist({ "Yes", "No" })
     end
 
     if choice == 1 then
-      vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+      if selected_buffer.current then
+        close_window()
+        vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+        M.toggle()
+      else
+        vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+      end
     end
+
+    ::continue::
   end
 
   vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, start - 1, end_, false, {})
-
   M.draw_window()
-
-  if deleted_self then
-    close_window()
-    M.toggle()
-  end
-
-  vim.api.nvim_input("<esc>")
 end
 
 function M.cycle_sort()
@@ -413,12 +410,10 @@ function M.draw_window()
     end
   end
 
-
   local title = config.title
 
   title = string.gsub(title, "%%count", tostring(#valid_buffers))
   title = string.gsub(title, "%%sort", config.sorting_algorithm)
-
 
   vim.api.nvim_win_set_config(BAFA_WINDOW_ID, { title = title })
 end
