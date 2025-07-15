@@ -55,7 +55,7 @@ end
 --- Get the buffer name by index
 ---
 --- @param buffer_index integer The index of the buffer
---- @return table | nil # The buffer name or nil if not found
+--- @return bafa.utils.buffer_info | nil # The buffer name or nil if not found
 function M.get_buffer_by_index(buffer_index)
   local buffer_numbers = M.get_buffers_as_table()
   local buffer = buffer_numbers[buffer_index]
@@ -75,7 +75,7 @@ end
 
 --- Get a table of `@bafa.utils.buffer_info` name by number
 ---
---- @return table<bafa.utils.buffer_info> # A table of buffers information
+--- @return bafa.utils.buffer_info[] # A table of buffers information
 function M.get_buffers_as_table()
   local buffers = {}
   local buffer_numbers = vim.api.nvim_list_bufs()
