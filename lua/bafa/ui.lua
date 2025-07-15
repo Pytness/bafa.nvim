@@ -93,6 +93,9 @@ local function create_window()
   local width = math.min(max_width, buffer_longest_name_width + 10)
   local height = math.min(max_height, buffer_lines + 2)
 
+  width = math.max(width, bafa_config.width or 0)
+  height = math.max(height, bafa_config.height or 0)
+
   local row_position = math.floor(((vim.o.lines - (bafa_config.height or height)) / 2) - 1)
   local col_position = math.floor((vim.o.columns - (bafa_config.width or width)) / 2)
 
@@ -101,8 +104,8 @@ local function create_window()
     title_pos = bafa_config.title_pos,
     relative = bafa_config.relative,
     border = bafa_config.border,
-    width = bafa_config.width or width,
-    height = bafa_config.height or height,
+    width = width,
+    height = height,
     row = row_position,
     col = col_position,
     style = bafa_config.style,
