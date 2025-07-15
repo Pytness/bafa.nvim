@@ -1,3 +1,7 @@
+--- @alias bafa.config.PathDisplay
+--- | '"full"' # Display the full path
+--- | '"short"' # Display a shortened version of the path
+
 --- @class bafa.config.config
 --- The title of the Bafa menu
 ---
@@ -20,6 +24,7 @@
 --- @field sorting_algorithm bafa.utils.sorting.AlgorithmName The sorting algorithm for the Bafa menu
 --- @field show_sorting_algorithm boolean Whether to show the sorting algorithm in the Bafa menu
 --- @field current_buffer_sign false | string False to disable, or a string to use as a sign for the buffer
+--- @field display_path bafa.config.PathDisplay | nil How to display the path of the buffers, defaults to "full"
 
 local SortingAlgorithm = require("bafa.utils.sorting").Algorithm
 
@@ -42,6 +47,7 @@ M.defaults = {
   sorting_algorithm = SortingAlgorithm.LAST_USED,
   show_sorting_algorithm = false,
   current_buffer_sign = '>',
+  display_path = "full",
 }
 
 M.options = M.defaults

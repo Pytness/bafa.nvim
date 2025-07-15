@@ -77,6 +77,7 @@ end
 ---
 --- @return bafa.utils.buffer_info[] # A table of buffers information
 function M.get_buffers_as_table()
+  local config = Config.get()
   local buffers = {}
   local buffer_numbers = vim.api.nvim_list_bufs()
 
@@ -96,6 +97,10 @@ function M.get_buffers_as_table()
     local buffer_name = vim.api.nvim_buf_get_name(buffer_number)
     local buffer_file_name = text_utils.get_normalized_path(buffer_name) or "untitled"
     local is_modified = vim.bo[buffer_number].modified == true
+
+    if config.display_path == "short" then
+      buffer_file_name = text_utils.get_shortened_path(buffer_file_name)
+    end
 
     --- @type bafa.utils.buffer_info
     local buffer = {
@@ -121,7 +126,7 @@ function M.get_buffers_as_table()
     buffers[max_last_used_index].current = true
   end
 
-  local sorting_algorithm = Config.get().sorting_algorithm
+  local sorting_algorithm = config.sorting_algorithm
   local sorting_algorithm_function = Sorting.get_sorting_algorithm(sorting_algorithm)
 
   if sorting_algorithm_function ~= nil then
