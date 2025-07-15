@@ -15,6 +15,8 @@ local noop_keys = {
   "u",
   "U",
   "v",
+  "p",
+  "P",
 }
 
 local default_keymaps = {
