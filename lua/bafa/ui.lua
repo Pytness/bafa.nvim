@@ -120,15 +120,15 @@ local M = {}
 
 --- Select the menu item based on the cursor position
 function M.select_menu_item()
-  local selected_line_number = vim.api.nvim_win_get_cursor(0)[1]
-  local selected_buffer = BufferUtils.get_buffer_by_index(selected_line_number)
+  local line_number = vim.api.nvim_win_get_cursor(0)[1]
+  local buffer = BufferUtils.get_buffer_by_index(line_number)
 
-  if selected_buffer == nil then
+  if buffer == nil then
     return
   end
 
   close_window()
-  vim.api.nvim_set_current_buf(selected_buffer.number)
+  vim.api.nvim_set_current_buf(buffer.number)
 end
 
 --- Delete the selected buffer
@@ -141,10 +141,10 @@ function M.delete_menu_item()
 
   --- @cast BAFA_BUFFER_ID -nil
 
-  local selected_line_number = vim.api.nvim_win_get_cursor(0)[1]
+  local line_number = vim.api.nvim_win_get_cursor(0)[1]
 
   local buffers = BufferUtils.get_buffers_as_table()
-  local buffer = buffers[selected_line_number]
+  local buffer = buffers[line_number]
 
   if buffer == nil then
     return
@@ -166,7 +166,7 @@ function M.delete_menu_item()
     vim.api.nvim_buf_delete(buffer.number, { force = true })
   end
 
-  vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, selected_line_number - 1, selected_line_number, false, {})
+  vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, line_number - 1, line_number, false, {})
 
   M.draw_window()
 end
@@ -178,41 +178,41 @@ function M.delete_multiple_menu_items()
 
   --- @cast BAFA_BUFFER_ID -nil
 
-  local start = vim.fn.getpos("v")[2]
-  local end_ = vim.fn.getpos(".")[2]
+  local start_pos = vim.fn.getpos("v")[2]
+  local end_pos = vim.fn.getpos(".")[2]
 
-  if start > end_ then
-    start, end_ = end_, start
+  if start_pos > end_pos then
+    start_pos, end_pos = end_pos, start_pos
   end
 
   local buffers = BufferUtils.get_buffers_as_table()
 
-  for line_number = start, end_ do
-    local selected_buffer = buffers[line_number]
+  for line_number = start_pos, end_pos do
+    local buffer = buffers[line_number]
 
-    if selected_buffer == nil then
+    if buffer == nil then
       goto continue
     end
 
     local choice = 1
-    if selected_buffer.is_modified then
+    if buffer.is_modified then
       choice = vim.fn.inputlist({ "Yes", "No" })
     end
 
     if choice == 1 then
-      if selected_buffer.current then
+      if buffer.current then
         close_window()
-        vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+        vim.api.nvim_buf_delete(buffer.number, { force = true })
         M.toggle()
       else
-        vim.api.nvim_buf_delete(selected_buffer.number, { force = true })
+        vim.api.nvim_buf_delete(buffer.number, { force = true })
       end
     end
 
     ::continue::
   end
 
-  vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, start - 1, end_, false, {})
+  vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, start_pos - 1, end_pos, false, {})
   M.draw_window()
 end
 
