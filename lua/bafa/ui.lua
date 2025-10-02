@@ -17,6 +17,8 @@ local BAFA_NAMESPACE_ID = vim.api.nvim_create_namespace("bafa.nvim")
 local BAFA_WINDOW_ID = nil --- @type integer | nil
 local BAFA_BUFFER_ID = nil --- @type integer | nil
 
+local M = {}
+
 --- Check if the window id is valid
 ---
 --- @return boolean
@@ -29,6 +31,36 @@ end
 --- @return boolean
 local function is_valid_buffer_id()
   return BAFA_BUFFER_ID ~= nil and vim.api.nvim_buf_is_valid(BAFA_BUFFER_ID)
+end
+
+local function close_window()
+  if not is_valid_window_id() then
+    return
+  end
+
+  --- @cast BAFA_WINDOW_ID -nil
+
+  vim.api.nvim_win_close(BAFA_WINDOW_ID, true)
+
+  BAFA_WINDOW_ID = nil
+  BAFA_BUFFER_ID = nil
+end
+
+--- Delete buffer
+---
+--- @param buffer_number number
+--- @return boolean
+local function force_delete_buffer(buffer_number)
+  local retries = 10000
+
+  while retries >= 0 and vim.api.nvim_buf_is_valid(buffer_number) do
+    close_window()
+    vim.api.nvim_buf_delete(buffer_number, { force = true })
+    retries = retries - 1
+    M.toggle()
+  end
+
+  return vim.api.nvim_buf_is_valid(buffer_number)
 end
 
 --- Get the diagnostics for a buffer
@@ -61,19 +93,6 @@ local function get_buffer_icon(buffer)
   local icon, icon_hl = Devicons.get_icon(buffer.name, buffer.extension, { default = true })
 
   return icon, icon_hl
-end
-
-local function close_window()
-  if not is_valid_window_id() then
-    return
-  end
-
-  --- @cast BAFA_WINDOW_ID -nil
-
-  vim.api.nvim_win_close(BAFA_WINDOW_ID, true)
-
-  BAFA_WINDOW_ID = nil
-  BAFA_BUFFER_ID = nil
 end
 
 --- Create a new window for the buffer menu
@@ -118,8 +137,6 @@ local function create_window()
     win_id = BAFA_WINDOW_ID,
   }
 end
-
-local M = {}
 
 --- Select the menu item based on the cursor position
 function M.select_menu_item()
@@ -203,19 +220,14 @@ function M.delete_multiple_menu_items()
     end
 
     if choice == 1 then
-      if buffer.current then
-        close_window()
-        vim.api.nvim_buf_delete(buffer.number, { force = true })
-        M.toggle()
-      else
-        vim.api.nvim_buf_delete(buffer.number, { force = true })
-      end
+      local res = force_delete_buffer(buffer.number)
     end
 
     ::continue::
   end
 
   vim.api.nvim_buf_set_lines(BAFA_BUFFER_ID, start_pos - 1, end_pos, false, {})
+
   M.draw_window()
 end
 
