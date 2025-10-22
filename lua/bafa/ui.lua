@@ -51,14 +51,9 @@ end
 --- @param buffer_number number
 --- @return boolean
 local function force_delete_buffer(buffer_number)
-  local retries = 10000
-
-  while retries >= 0 and vim.api.nvim_buf_is_valid(buffer_number) do
-    close_window()
-    vim.api.nvim_buf_delete(buffer_number, { force = true })
-    retries = retries - 1
-    M.toggle()
-  end
+  close_window()
+  vim.api.nvim_buf_delete(buffer_number, { force = true })
+  M.toggle()
 
   return vim.api.nvim_buf_is_valid(buffer_number)
 end
@@ -220,7 +215,7 @@ function M.delete_multiple_menu_items()
     end
 
     if choice == 1 then
-      local res = force_delete_buffer(buffer.number)
+      force_delete_buffer(buffer.number)
     end
 
     ::continue::
